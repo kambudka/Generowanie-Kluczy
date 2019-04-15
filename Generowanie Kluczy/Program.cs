@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace Generowanie_Kluczy
@@ -588,13 +589,25 @@ namespace Generowanie_Kluczy
             Console.WriteLine("Podaj nazwe pliku klucza");
             name = Console.ReadLine();
             program.ReadKey(name);
+
             Console.WriteLine("Podaj nazwe pliku do zakodowania");
             name = Console.ReadLine();
+
+            Console.WriteLine("Trwa szyfrowanie pliku...");
+            Stopwatch timer = Stopwatch.StartNew();
             program.Encode(name);
+            timer.Stop();
+            Console.WriteLine($"Zakodowano plik {name} w {timer.Elapsed}.");
+
             Console.WriteLine("Podaj nazwe pliku do odkodowania");
             name = Console.ReadLine();
+
+            Console.WriteLine("Trwa odkodowanie pliku...");
+            timer = Stopwatch.StartNew();
             program.Decode(name);
-            Console.WriteLine("Odkodowano -> ENTER");
+            timer.Stop();
+            Console.WriteLine($"Odkodowano w {timer.Elapsed} -> ENTER");
+
             Console.ReadKey();
         }
     }
