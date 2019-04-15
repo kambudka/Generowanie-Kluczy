@@ -39,7 +39,7 @@ namespace Generowanie_Kluczy
             int number;
             byte readbyte;
             int bit = 0;
-            string path = @"C:\Users\Zalgo\Desktop\Testy\" + name;
+            string path = @"C:\Users\Zalgo\Desktop\Testy\Klucz";
 
             try { br = new BinaryReader(new FileStream(path, FileMode.Open)); }
             catch (IOException e)
@@ -192,7 +192,7 @@ namespace Generowanie_Kluczy
             int number;
             byte readbyte;
             int bit = 0;
-            string path = @"C:\Users\Zalgo\Desktop\Testy\" + name;
+            string path = @"C:\Users\Zalgo\Desktop\Testy\test3.bin";
 
             try { br = new BinaryReader(new FileStream(path, FileMode.Open)); }
             catch (IOException e)
@@ -259,7 +259,7 @@ namespace Generowanie_Kluczy
                 int offsetr;
                 byte wiersz;
                 byte kolumna;
-                BitArray nowy;
+                BitArray nowy = new BitArray(4);
                 // Do lewego przypisujemy prawy
                 Ltemp = R;
                 //Split into 8 - 6bit
@@ -267,10 +267,11 @@ namespace Generowanie_Kluczy
                 {
                     offset = 6 * i;
                     BitArray indexo = new BitArray(index);
-                    indexo[1] = XORED[0 + offset];
-                    indexo[0] = XORED[5 + offset];
+                    indexo[0] = XORED[0 + offset];
+                    indexo[1] = XORED[5 + offset];
 
                     wiersz = ConvertToByte(indexo);
+                    //wiersz += 16;
 
                     indexo[3] = XORED[1 + offset];
                     indexo[2] = XORED[2 + offset];
@@ -278,14 +279,46 @@ namespace Generowanie_Kluczy
                     indexo[0] = XORED[4 + offset];
                     kolumna = ConvertToByte(indexo);
                     
-                    //switch()
-                    nowy = new BitArray(S1[kolumna * wiersz]);
+                    switch(i)
+                    {
+                    case 0:
+                        nowy = new BitArray(new byte[] { S1[kolumna + 16 * wiersz] });
+                        break;
+                    case 1:
+                        nowy = new BitArray(new byte[] { S2[kolumna + 16 * wiersz] });
+                        break;
+                    case 2:
+                        nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
+                        break;
+                    case 3:
+                        nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
+                        break;
+                    case 4:
+                        nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
+                        break;
+                    case 5:
+                        nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
+                        break;
+                    case 6:
+                        nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
+                        break;
+                    case 7:
+                        nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
+                        break;
+                    }
 
                     offsetr = 4 * i;
-                    R[offsetr] = nowy[0];
-                    R[offsetr+1] = nowy[1];
-                    R[offsetr+2] = nowy[2];
-                    R[offsetr+3] = nowy[3];
+
+                        R[offsetr] = nowy[3];
+                        Console.Write(R.Get(offsetr));
+                        R[offsetr + 1] = nowy[2];
+                        Console.Write(R.Get(offsetr + 1));
+                        R[offsetr + 2] = nowy[1];
+                        Console.Write(R.Get(offsetr + 2));
+                        R[offsetr + 3] = nowy[0];
+                        Console.WriteLine(R.Get(offsetr + 3));
+
+                    
                 }
 
                 R = R.Xor(L);
