@@ -278,7 +278,7 @@ namespace Generowanie_Kluczy
                     indexo[0] = XORED[4 + offset];
                     kolumna = ConvertToByte(indexo);
                     
-                    switch()
+                    //switch()
                     nowy = new BitArray(S1[kolumna * wiersz]);
 
                     offsetr = 4 * i;
