@@ -7,6 +7,7 @@ namespace Generowanie_Kluczy
 {
     class Program
     {
+        const string BASE_PATH = @"C:\Users\User\Desktop\Testy";
 
         List<BitArray> KeyArray = new List<BitArray>();
 
@@ -131,7 +132,7 @@ namespace Generowanie_Kluczy
 
             BinaryReader br;
             byte readbyte;
-            string path = @"C:\Users\Zalgo\Desktop\Testy\" + name;
+            string path = $"{BASE_PATH}\\{name}";
 
             try { br = new BinaryReader(new FileStream(path, FileMode.Open)); }
             catch (IOException e)
@@ -213,7 +214,7 @@ namespace Generowanie_Kluczy
             BinaryReader br;
             BinaryWriter bw;
             byte readbyte;
-            string path = @"C:\Users\Zalgo\Desktop\Testy\" + name;
+            string path = $"{BASE_PATH}\\{name}";
 
             try { br = new BinaryReader(new FileStream(path, FileMode.Open)); }
             catch (IOException e)
@@ -221,7 +222,7 @@ namespace Generowanie_Kluczy
                 Console.WriteLine(e.Message + "\n Cannot open file.");
                 return;
             }
-            try { bw = new BinaryWriter(new FileStream(@"C:\Users\Zalgo\Desktop\Testy\enco.bin", FileMode.Create)); }
+            try { bw = new BinaryWriter(new FileStream($"{BASE_PATH}\\{name}_encoded.bin", FileMode.Create)); }
             catch (IOException e)
             {
                 Console.WriteLine(e.Message + "\n Cannot create file.");
@@ -399,7 +400,7 @@ namespace Generowanie_Kluczy
             BinaryReader br;
             BinaryWriter bw;
             byte readbyte;
-            string path = @"C:\Users\Zalgo\Desktop\Testy\" + name;
+            string path = $"{BASE_PATH}\\{name}";
 
             try { br = new BinaryReader(new FileStream(path, FileMode.Open)); }
             catch (IOException e)
@@ -407,7 +408,7 @@ namespace Generowanie_Kluczy
                 Console.WriteLine(e.Message + "\n Cannot open file.");
                 return;
             }
-            try { bw = new BinaryWriter(new FileStream(@"C:\Users\Zalgo\Desktop\Testy\deco.bin", FileMode.Create)); }
+            try { bw = new BinaryWriter(new FileStream($"{BASE_PATH}\\{name}_decoded.bin", FileMode.Create)); }
             catch (IOException e)
             {
                 Console.WriteLine(e.Message + "\n Cannot create file.");
