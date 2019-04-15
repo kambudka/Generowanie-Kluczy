@@ -21,6 +21,22 @@ namespace Generowanie_Kluczy
             return bytes[0];
         }
 
+
+
+        public static int BitArrayToInt(BitArray ba)
+        {
+            var len = ba.Count;
+            int n = 0;
+            for (int i = 0; i < len; i++)
+            {
+                if (ba.Get(i))
+                    n |= 1 << i;
+            }
+            return n;
+        }
+
+
+
         public void ReadKey(string name)
         {
             byte[] PC1 = {57,49,41,33,25,17,9,1,58,50,42,34,26,18,10,2,59,51,43,35,27,19,11,3,60,52,44,36,
@@ -143,6 +159,14 @@ namespace Generowanie_Kluczy
                         20, 21, 22, 23, 24, 25,
                         24, 25, 26, 27, 28, 29,
                         28, 29, 30, 31, 32, 1};
+            byte[] P = {16, 7, 20, 21,
+                        29, 12, 28, 17,
+                        1, 15, 23, 26,
+                        5, 18, 31, 10,
+                        2, 8, 24, 14,
+                        32, 27, 3, 9,
+                        19, 13, 30, 6,
+                        22, 11, 4, 25};
 
             #region S-tables
             byte[] S1 = {14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0, 7,
@@ -189,15 +213,20 @@ namespace Generowanie_Kluczy
             byte[] SHIFT = { 1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1 };
 
             BinaryReader br;
-            int number;
+            BinaryWriter bw;
             byte readbyte;
-            int bit = 0;
             string path = @"C:\Users\Zalgo\Desktop\Testy\test3.bin";
 
             try { br = new BinaryReader(new FileStream(path, FileMode.Open)); }
             catch (IOException e)
             {
                 Console.WriteLine(e.Message + "\n Cannot open file.");
+                return;
+            }
+            try { bw = new BinaryWriter(new FileStream(@"C:\Users\Zalgo\Desktop\Testy\testencoded.bin", FileMode.Create)); }
+            catch (IOException e)
+            {
+                Console.WriteLine(e.Message + "\n Cannot create file.");
                 return;
             }
 
@@ -208,12 +237,13 @@ namespace Generowanie_Kluczy
             BitArray L = new BitArray(32);
             BitArray Ltemp = new BitArray(32);
             BitArray R = new BitArray(32);
+            BitArray Rtemp = new BitArray(32);
             BitArray R48 = new BitArray(48);
             BitArray XORED = new BitArray(48);
             BitArray BIT6 = new BitArray(6);
 
-            //while (br.BaseStream.Position != br.BaseStream.Length)
-            //{
+            while (br.BaseStream.Position != br.BaseStream.Length)
+            {
                 poz = 0;
                 //Start PC1
                 for (int i = 0; i < 8; i++)
@@ -232,9 +262,12 @@ namespace Generowanie_Kluczy
                 //Initial Permutation
                 for (int j = 0; j < 64; j++)
                 {
-                    Block[j] = FileBlock.Get(IP[j]-1);
+                    Block[j] = FileBlock.Get(IP[j] - 1);
                     //Console.WriteLine(Key.Get(j));
                 }
+
+
+
                 //Spliting L and R
                 for (int j = 0; j < 32; j++)
                 {
@@ -244,89 +277,111 @@ namespace Generowanie_Kluczy
                 }
 
 
-
-                //32 R Block -> 48 R Block
-                for (int j = 0; j < 48; j++)
+                for (int K = 0; K < 16; K++)
                 {
-                    R48[j] = R.Get(E[j]-1);
-                    //Console.WriteLine(Key.Get(j));
-                }
-                //R Block XOR KEY
-                XORED = R48.Xor(KeyArray[0]);
 
-                bool[] index = new bool[8] { false, false, false, false, false, false, false, false };
-                int offset;
-                int offsetr;
-                byte wiersz;
-                byte kolumna;
-                BitArray nowy = new BitArray(4);
-                // Do lewego przypisujemy prawy
-                Ltemp = R;
-                //Split into 8 - 6bit
-                for (int i = 0; i < 8; i++)
-                {
-                    offset = 6 * i;
-                    BitArray indexo = new BitArray(index);
-                    indexo[0] = XORED[0 + offset];
-                    indexo[1] = XORED[5 + offset];
-
-                    wiersz = ConvertToByte(indexo);
-                    //wiersz += 16;
-
-                    indexo[3] = XORED[1 + offset];
-                    indexo[2] = XORED[2 + offset];
-                    indexo[1] = XORED[3 + offset];
-                    indexo[0] = XORED[4 + offset];
-                    kolumna = ConvertToByte(indexo);
-                    
-                    switch(i)
+                    //32 R Block -> 48 R Block E permutation
+                    for (int j = 0; j < 48; j++)
                     {
-                    case 0:
-                        nowy = new BitArray(new byte[] { S1[kolumna + 16 * wiersz] });
-                        break;
-                    case 1:
-                        nowy = new BitArray(new byte[] { S2[kolumna + 16 * wiersz] });
-                        break;
-                    case 2:
-                        nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
-                        break;
-                    case 3:
-                        nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
-                        break;
-                    case 4:
-                        nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
-                        break;
-                    case 5:
-                        nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
-                        break;
-                    case 6:
-                        nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
-                        break;
-                    case 7:
-                        nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
-                        break;
+                        R48[j] = R.Get(E[j] - 1);
+                        //Console.WriteLine(Key.Get(j));
                     }
+                    //R Block XOR KEY
+                    XORED = R48.Xor(KeyArray[K]);
+                    //int test = 12;
+                    //BitArray b = new BitArray(new int[] { test });
+                    //int wynik =  BitArrayToInt(b);
+                    // Console.Write(wynik);
 
-                    offsetr = 4 * i;
+                    bool[] index = new bool[8] { false, false, false, false, false, false, false, false };
+                    int offset;
+                    int offsetr;
+                    byte wiersz;
+                    byte kolumna;
+                    BitArray nowy = new BitArray(4);
+                    // Do lewego przypisujemy prawy
+                    Ltemp = R;
+
+                    //Split into 8 - 6bit
+                    for (int i = 0; i < 8; i++)
+                    {
+                        offset = 6 * i;
+                        BitArray indexo = new BitArray(index);
+                        indexo[0] = XORED[0 + offset];
+                        indexo[1] = XORED[5 + offset];
+
+                        wiersz = ConvertToByte(indexo);
+                        //wiersz += 16;
+
+                        indexo[3] = XORED[1 + offset];
+                        indexo[2] = XORED[2 + offset];
+                        indexo[1] = XORED[3 + offset];
+                        indexo[0] = XORED[4 + offset];
+                        kolumna = ConvertToByte(indexo);
+
+                        switch (i)
+                        {
+                            case 0:
+                                nowy = new BitArray(new byte[] { S1[kolumna + 16 * wiersz] });
+                                break;
+                            case 1:
+                                nowy = new BitArray(new byte[] { S2[kolumna + 16 * wiersz] });
+                                break;
+                            case 2:
+                                nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
+                                break;
+                            case 3:
+                                nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
+                                break;
+                            case 4:
+                                nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
+                                break;
+                            case 5:
+                                nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
+                                break;
+                            case 6:
+                                nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
+                                break;
+                            case 7:
+                                nowy = new BitArray(new byte[] { S3[kolumna + 16 * wiersz] });
+                                break;
+                        }
+
+                        offsetr = 4 * i;
 
                         R[offsetr] = nowy[3];
-                        Console.Write(R.Get(offsetr));
+                        //Console.Write(R.Get(offsetr));
                         R[offsetr + 1] = nowy[2];
-                        Console.Write(R.Get(offsetr + 1));
+                        //Console.Write(R.Get(offsetr + 1));
                         R[offsetr + 2] = nowy[1];
-                        Console.Write(R.Get(offsetr + 2));
+                        //Console.Write(R.Get(offsetr + 2));
                         R[offsetr + 3] = nowy[0];
-                        Console.WriteLine(R.Get(offsetr + 3));
+                        //Console.WriteLine(R.Get(offsetr + 3));
 
-                    
+
+                    }
+                    //P Permutation
+                    Rtemp = R;
+                    for (int j = 0; j < 32; j++)
+                    {
+                        R[j] = Rtemp.Get(P[j] - 1);
+                        //Console.WriteLine(Key.Get(j));
+                    }
+                    //15 Xorowanie 
+                    R = L.Xor(R);
+                    //Przypisanie Do lewego bloku prawego
+                    L = Ltemp;
                 }
+                int newblock = BitArrayToInt(R);
+               // Console.Write(newblock);
+                bw.Write(newblock);
+                newblock = BitArrayToInt(L);
+                //Console.Write(newblock);
+                bw.Write(newblock);
 
-                R = R.Xor(L);
-                L = Ltemp;
+            }
 
-            //}
-            
-
+            bw.Close();
             br.Close();
 
         }
