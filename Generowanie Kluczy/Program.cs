@@ -272,9 +272,6 @@ namespace Generowanie_Kluczy
 
             byte test = ConvertToByte(testowe);
             byte test2 = ConvertToByte(testowe2);
-            Console.WriteLine(testowe.Get(0));
-            Console.WriteLine("Kurwa" + test);
-            Console.WriteLine("Kurwa2" + test2);
             while (br.BaseStream.Position != br.BaseStream.Length)
             {
                 poz = 0;
@@ -301,7 +298,6 @@ namespace Generowanie_Kluczy
                         FileBlock[poz] = mybit;
                         poz++;
                     }
-                    Console.WriteLine();
                 }
 
                 //Initial Permutation
@@ -444,7 +440,6 @@ namespace Generowanie_Kluczy
                         Byt.Set(7-j, Block.Get(j + offsetro));
                     }
                     byte newbyte = ConvertToByte(Byt);
-                    Console.WriteLine(newbyte);
                     bw.Write(newbyte);
                 }
 
@@ -578,9 +573,6 @@ namespace Generowanie_Kluczy
 
             byte test = ConvertToByte(testowe);
             byte test2 = ConvertToByte(testowe2);
-            Console.WriteLine(testowe.Get(0));
-            Console.WriteLine("Kurwa" + test);
-            Console.WriteLine("Kurwa2" + test2);
             while (br.BaseStream.Position < br.BaseStream.Length)
             {
                 poz = 0;
@@ -588,7 +580,6 @@ namespace Generowanie_Kluczy
                 for (int i = 0; i < 8; i++)
                 {
                     readbyte = br.ReadByte();
-                    Console.WriteLine(readbyte);
                     if (br.BaseStream.Position == br.BaseStream.Length)
                     {
                         extra = readbyte;
@@ -752,7 +743,6 @@ namespace Generowanie_Kluczy
                         Byt.Set(7 - j, Block.Get(j + offsetro));
                     }
                     byte newbyte = ConvertToByte(Byt);
-                    Console.WriteLine(newbyte);
                     bw.Write(newbyte);
                 }
                 // Console.Write(newblock);
@@ -761,7 +751,7 @@ namespace Generowanie_Kluczy
                 //bw.Write(newblock);
 
             }
-
+            bw.BaseStream.SetLength(Math.Max(0, bw.BaseStream.Length - extra));
             bw.Close();
             br.Close();
             Console.Write(extra);
