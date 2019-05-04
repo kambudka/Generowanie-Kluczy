@@ -8,7 +8,7 @@ namespace Generowanie_Kluczy
 {
     class Program
     {
-        const string BASE_PATH = @"C:\Users\User\Desktop\Testy";
+        const string BASE_PATH = @"C:\Users\Zalgo\Desktop\Testy";
 
         List<BitArray> KeyArray = new List<BitArray>();
 
@@ -112,14 +112,13 @@ namespace Generowanie_Kluczy
 
         public void ReadKey(string name)
         {
-            byte[] PC1 = {57, 49, 41, 33, 25, 17, 9,
-                        1, 58, 50, 42, 34, 26, 18,
-                        10, 2, 59, 51, 43, 35, 27,
-                        19, 11, 3, 60, 52, 44, 36,
-                        63, 55, 47, 39, 31, 23, 15,
-                        7, 62, 54, 46, 38, 30, 22,
-                        14, 6, 61, 53, 45, 37, 29,
-                        21, 13, 5, 28, 20, 12, 4,};
+            int[] PC1 = {56, 48, 40, 32, 24, 16, 8, 0, 57, 49, 41, 33, 25, 17,
+                        9, 1, 58, 50, 42, 34, 26,
+                        18, 10, 2, 59, 51, 43, 35,
+                        62, 54, 46, 38, 30, 22, 14,
+                        6, 61, 53, 45, 37, 29, 21,
+                        13, 5, 60, 52, 44, 36, 28,
+                        20, 12, 4, 27, 19, 11, 3};
 
             byte[] PC2 = {14,17,11,24,1,5,
                           3,28,15,6,21,10,
@@ -134,7 +133,6 @@ namespace Generowanie_Kluczy
             BinaryReader br;
             byte readbyte;
             string path = $"{BASE_PATH}\\{name}";
-
             try { br = new BinaryReader(new FileStream(path, FileMode.Open)); }
             catch (IOException e)
             {
@@ -151,21 +149,48 @@ namespace Generowanie_Kluczy
 
             while (br.BaseStream.Position != br.BaseStream.Length)
             {
-                //Start PC1
                 readbyte = br.ReadByte();
                 BitArray mybits = new BitArray(new byte[] { readbyte });
-                for (int j = 0; j < mybits.Length; j++)
+                for (int j = mybits.Length - 1; j >= 0; j--)
                 {
                     var mybit = mybits.Get(j);
                     FileKey[poz] = mybit;
+                    if (FileKey[poz] == true)
+                    {
+                        Console.Write(1);
+                    }
+                    else
+                        Console.Write(0);
+                    if (j%8 == 0)
+                    {
+                        Console.Write(" ");
+                    }
                     poz++;
                 }
 
             }
-            for(int j = 0; j < 56; j++)
+
+            //PC1
+            Console.WriteLine();
+            for (int j = 0; j < 56; j++)
             {
-                Key[j] = FileKey.Get(PC1[j]-1);
+                if (j % 8 == 0)
+                {
+                    Console.Write(" ");
+                }
+
+                Key[j] = FileKey.Get(PC1[j]);
+                if (FileKey.Get(PC1[j]) == true)
+                {
+                    Console.Write(1);
+                }
+                else
+                    Console.Write(0);
             }
+
+            
+
+            Console.WriteLine();
             for (int j = 0; j < 28; j++)
             {
                 C[j] = Key.Get(j);
@@ -205,8 +230,26 @@ namespace Generowanie_Kluczy
                     KeyOut[j] = Key[PC2[j] - 1];
                 }
                 KeyArray.Add(KeyOut);
+
+                for (int j = 0; j < 48; j++)
+                {
+                    if (j % 6 == 0)
+                    {
+                        Console.Write(" ");
+                    }
+                    if (KeyOut[j] == true)
+                    {
+                        Console.Write(1);
+                    }
+                    else
+                        Console.Write(0);
+
+                }
+                Console.WriteLine();
             }
             br.Close();
+
+
         }
 
         public void Encode(string name)
@@ -217,13 +260,14 @@ namespace Generowanie_Kluczy
             byte readbyte;
             string path = $"{BASE_PATH}\\{name}";
 
+
             try { br = new BinaryReader(new FileStream(path, FileMode.Open)); }
             catch (IOException e)
             {
                 Console.WriteLine(e.Message + "\n Cannot open file.");
                 return;
             }
-            try { bw = new BinaryWriter(new FileStream($"{BASE_PATH}\\{name}_encoded.bin", FileMode.Create)); }
+            try { bw = new BinaryWriter(new FileStream($"{BASE_PATH}\\encoded.bin", FileMode.Create)); }
             catch (IOException e)
             {
                 Console.WriteLine(e.Message + "\n Cannot create file.");
@@ -249,7 +293,6 @@ namespace Generowanie_Kluczy
             while (br.BaseStream.Position != br.BaseStream.Length)
             {
                 poz = 0;
-                //Start PC1
                 for (int i = 0; i < 8; i++)
                 {
                     if (br.BaseStream.Position == br.BaseStream.Length)
@@ -270,6 +313,21 @@ namespace Generowanie_Kluczy
                         poz++;
                     }
                 }
+                Console.WriteLine();
+                for (int j = 0; j < 64; j++)
+                {
+                    if (j % 4 == 0)
+                    {
+                        Console.Write(" ");
+                    }
+                    if (FileBlock[j] == true)
+                    {
+                        Console.Write(1);
+                    }
+                    else
+                        Console.Write(0);
+                }
+                Console.WriteLine();
 
                 //Initial Permutation
                 for (int j = 0; j < 64; j++)
@@ -306,16 +364,16 @@ namespace Generowanie_Kluczy
                     {
                         offset = 6 * i;
                         BitArray indexo = new BitArray(index);
-                        indexo[0] = XORED[0 + offset];
-                        indexo[1] = XORED[5 + offset];
+                        indexo[1] = XORED[0 + offset];
+                        indexo[0] = XORED[5 + offset];
 
                         wiersz = ConvertToByte(indexo);
                         //wiersz += 16;
 
-                        indexo[0] = XORED[1 + offset];
-                        indexo[1] = XORED[2 + offset];
-                        indexo[2] = XORED[3 + offset];
-                        indexo[3] = XORED[4 + offset];
+                        indexo[3] = XORED[1 + offset];
+                        indexo[2] = XORED[2 + offset];
+                        indexo[1] = XORED[3 + offset];
+                        indexo[0] = XORED[4 + offset];
                         kolumna = ConvertToByte(indexo);
 
                         switch (i)
@@ -409,7 +467,7 @@ namespace Generowanie_Kluczy
                 Console.WriteLine(e.Message + "\n Cannot open file.");
                 return;
             }
-            try { bw = new BinaryWriter(new FileStream($"{BASE_PATH}\\{name}_decoded.bin", FileMode.Create)); }
+            try { bw = new BinaryWriter(new FileStream($"{BASE_PATH}\\decoded.bin", FileMode.Create)); }
             catch (IOException e)
             {
                 Console.WriteLine(e.Message + "\n Cannot create file.");
@@ -494,15 +552,15 @@ namespace Generowanie_Kluczy
                     {
                         offset = 6 * i;
                         BitArray indexo = new BitArray(index);
-                        indexo[0] = XORED[0 + offset];
-                        indexo[1] = XORED[5 + offset];
+                        indexo[1] = XORED[0 + offset];
+                        indexo[0] = XORED[5 + offset];
 
                         wiersz = ConvertToByte(indexo);
 
-                        indexo[0] = XORED[1 + offset];
-                        indexo[1] = XORED[2 + offset];
-                        indexo[2] = XORED[3 + offset];
-                        indexo[3] = XORED[4 + offset];
+                        indexo[3] = XORED[1 + offset];
+                        indexo[2] = XORED[2 + offset];
+                        indexo[1] = XORED[3 + offset];
+                        indexo[0] = XORED[4 + offset];
                         kolumna = ConvertToByte(indexo);
 
                         switch (i)
